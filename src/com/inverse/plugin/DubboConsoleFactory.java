@@ -36,20 +36,18 @@ public class DubboConsoleFactory implements ToolWindowFactory {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        //创建出NoteListWindow对象
-        DubboConsole dubboConsole = new DubboConsole(project, toolWindow);
         //获取内容工厂的实例
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-        //获取用于toolWindow显示的内容
+        //创建出DubboConsole
+        DubboClient dubboClient = new DubboClient(project, toolWindow);
+        Content dubboConsole = contentFactory.createContent(dubboClient.getPanel(), "Dubbo Client", false);
+        toolWindow.getContentManager().addContent(dubboConsole);
+        //创建DubboClient
         ConsoleView consoleView = MyConsoleView.getInstance(project).getConsoleView();
         consoleView.print(BANNER, ConsoleViewContentType.LOG_INFO_OUTPUT);
         Content content = contentFactory.createContent(createConsolePanel(consoleView, null), "Dubbo Console", false);
-        ConsoleView consoleView2 = MyConsoleView.getInstance(project).createConsole(project);
-        Content content2 = contentFactory.createContent(createConsolePanel(consoleView2, null), "Dubbo Console2", false);
         //给toolWindow设置内容
         toolWindow.getContentManager().addContent(content);
-        toolWindow.getContentManager().addContent(content2);
-
     }
 
     private JComponent createConsolePanel(final ConsoleView view, final ActionGroup actions) {
