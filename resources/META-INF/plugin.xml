@@ -5,13 +5,14 @@
     <vendor email="support@x-inverse.com" url="http://www.x-inverse.com">x-inverse</vendor>
 
     <description><![CDATA[
-      desc.<br>
-      <em>啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊</em>
+      Author: Keeper<br>
+      Description: 这个是一个dubbo连接客户端，可以简化dubbo调试操作<br>
+      <em></em>
     ]]></description>
 
     <change-notes><![CDATA[
-      0.1
-      啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊<br>
+      0.1<br>
+      这个是0.1版本，加入基本的客户端连接和请求功能<br>
     ]]>
     </change-notes>
 
