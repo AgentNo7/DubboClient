@@ -10,6 +10,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.WindowManager;
 
 import javax.swing.*;
+import javax.tools.Tool;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -20,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -46,6 +48,7 @@ public class DubboClient {
     private JLabel outputLabel;
     private JButton invokeButton;
     private JButton connectButton;
+    private JButton settingsButton;
 
 
     private DubboSocket dubboSocket;
@@ -72,37 +75,30 @@ public class DubboClient {
                 return;
             }
 
-            try {
-                String ls = dubboSocket.sendCommand("ls");
-                List<String> interfaces = toList(ls);
-                if (interfaces.size() == 0) {
-                    return;
-                }
-                for (String anInterface : interfaces) {
-                    classBox.addItem(anInterface);
-                }
-                String firstClassMethod = dubboSocket.sendCommand("ls " + interfaces.get(0));
-                List<String> methodList = toList(firstClassMethod);
-                for (String method : methodList) {
-                    methodBox.addItem(method);
-                }
-            } catch (IOException ioException) {
-                Tools.showErrorDialog("连接异常");
-                throw new RuntimeException("连接异常");
+            Future<ExecuteResult<String>> ls1 = dubboSocket.sendCommand("ls");
+            String ls = Tools.blockGetFutureResult(ls1);
+            List<String> interfaces = toList(ls);
+            if (interfaces.size() == 0) {
+                return;
+            }
+            for (String anInterface : interfaces) {
+                classBox.addItem(anInterface);
+            }
+            Future<ExecuteResult<String>> ls2 = dubboSocket.sendCommand("ls " + interfaces.get(0));
+            String firstClassMethod = Tools.blockGetFutureResult(ls2);
+            List<String> methodList = toList(firstClassMethod);
+            for (String method : methodList) {
+                methodBox.addItem(method);
             }
 
             classBox.addItemListener(e1 -> {
                 String clazz = (String) e1.getItem();
                 String classMethod;
-                try {
-                    classMethod = dubboSocket.sendCommand("ls " + clazz);
-                } catch (IOException ioException) {
-                    Tools.showErrorDialog("连接异常");
-                    throw new RuntimeException("连接异常");
-                }
+                Future<ExecuteResult<String>> ls3 = dubboSocket.sendCommand("ls " + clazz);
+                classMethod = Tools.blockGetFutureResult(ls3);
                 methodBox.removeAllItems();
-                List<String> methodList = toList(classMethod);
-                for (String method : methodList) {
+                List<String> methodNameList = toList(classMethod);
+                for (String method : methodNameList) {
                     methodBox.addItem(method);
                 }
             });
@@ -112,15 +108,15 @@ public class DubboClient {
                 String methodName = ((String) methodBox.getSelectedItem()).trim();
                 String classAndMethod = clazzName + "." + methodName;
                 String args = inputTextArea.getText();
-                String result;
-                try {
-                    String command = "invoke " + classAndMethod + "(" + args + ")";
-                    result = dubboSocket.sendCommand(command);
-                } catch (IOException ioException) {
-                    Tools.showErrorDialog("连接异常");
-                    throw new RuntimeException("连接异常");
+                String command = "invoke " + classAndMethod + "(" + args + ")";
+                Future<ExecuteResult<String>> invokeResult = dubboSocket.sendCommand(command, outputTextArea);
+                if (invokeResult == DubboSocket.IN_EXECUTION_FUTURE) {
+                    Tools.showErrorDialog("请求还在运行中");
                 }
-                outputTextArea.setText(result);
+            });
+
+            settingsButton.addActionListener(e3 -> {
+                Tools.showErrorDialog("这个是设置按钮");
             });
         });
     }

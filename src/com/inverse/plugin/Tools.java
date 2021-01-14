@@ -9,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 /**
@@ -58,5 +60,16 @@ public class Tools {
         builder.setErrorText(errorMsg);
         builder.setTitle("Tip");
         builder.show();
+    }
+
+    public static <T> T blockGetFutureResult(Future<ExecuteResult<T>> future) {
+        ExecuteResult<T> result;
+        try {
+            result = future.get();
+            return result.getData();
+        } catch (InterruptedException | ExecutionException e) {
+            Tools.showErrorDialog("连接异常");
+            throw new RuntimeException("连接异常", e);
+        }
     }
 }
