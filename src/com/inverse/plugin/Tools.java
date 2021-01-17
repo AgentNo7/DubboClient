@@ -1,6 +1,5 @@
 package com.inverse.plugin;
 
-import com.google.common.collect.Lists;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogBuilder;
 
@@ -39,6 +38,10 @@ public class Tools {
 
     public static void setProject(Project proj) {
         project = proj;
+    }
+
+    public static Project getProject() {
+        return project;
     }
 
     public static <T> T wrapErrorDialog(Supplier<T> supplier, String errorMsg) {

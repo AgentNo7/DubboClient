@@ -1,6 +1,5 @@
 package com.inverse.plugin;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import org.bouncycastle.util.Arrays;
 import org.jetbrains.annotations.NotNull;
@@ -11,14 +10,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @author keeper
@@ -49,7 +45,7 @@ public class DubboSocket extends Socket {
         }
 
         @Override
-        public ExecuteResult<String> get(long timeout, @NotNull TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        public ExecuteResult<String> get(long timeout, @NotNull TimeUnit unit) {
             return IN_EXECUTION;
         }
     };
@@ -60,20 +56,33 @@ public class DubboSocket extends Socket {
 
     private volatile Future<ExecuteResult<String>> runningTask = null;
 
-    private final byte[] buf = new byte[8192];
+    private byte[] buf;
 
     private BufferedWriter writer;
     private InputStream inputStream;
 
     public DubboSocket(String host, int port) throws IOException {
         super(host, port);
-        writer = new BufferedWriter(new OutputStreamWriter(getOutputStream(), "GBK"));
+        setSoTimeout(5000);
+        //charset
+        SettingsState instance = SettingsState.getInstance(Tools.getProject());
+        writer = new BufferedWriter(new OutputStreamWriter(getOutputStream(), instance.inputEncoding));
+        //byte
+        buf = new byte[instance.bufSize];
         inputStream = getInputStream();
         setKeepAlive(true);
     }
 
     public DubboSocket() throws IOException {
         this("127.0.0.1", 20882);
+    }
+
+    public void setWriterEncoding(String encoding) throws IOException {
+        writer = new BufferedWriter(new OutputStreamWriter(getOutputStream(), encoding));
+    }
+
+    public void setBufSize(int size) {
+        buf = new byte[size];
     }
 
     public synchronized Future<ExecuteResult<String>> sendCommand(String command) {
@@ -110,7 +119,9 @@ public class DubboSocket extends Socket {
     private String readAll() throws IOException {
         Arrays.clear(buf);
         inputStream.read(buf);
-        String s = new String(buf, "UTF-8");
+        //charset
+        SettingsState instance = SettingsState.getInstance(Tools.getProject());
+        String s = new String(buf, instance.outputEncoding);
         s = s.trim();
         if (s.endsWith(SUFFIX)) {
             return s.substring(0, s.length() - SUFFIX.length());

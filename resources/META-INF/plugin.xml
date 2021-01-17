@@ -1,8 +1,8 @@
 <idea-plugin>
-    <id>com.your.company.unique.plugin.id</id>
-    <name>Myplugin</name>
+    <id>com.x-inverse.keeper.dubbo.client</id>
+    <name>DubboClient</name>
     <version>1.0</version>
-    <vendor email="support@x-inverse.com" url="http://www.x-inverse.com">x-inverse</vendor>
+    <vendor email="support@x-inverse.com" url="http://www.x-inverse.com">Keeper</vendor>
 
     <description><![CDATA[
       Author: Keeper<br>
@@ -15,6 +15,8 @@
       这个是0.1版本，加入基本的客户端连接和请求功能<br>
       0.2<br>
       0.2版本，加入多线程请求和设置按钮<br>
+      0.3<br>
+      0.3版本，取消设置按钮，设置放在Project Settings中<br>
     ]]>
     </change-notes>
 
@@ -27,14 +29,19 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <toolWindow id="Dubbo Console" anchor="bottom" factoryClass="com.inverse.plugin.DubboConsoleFactory"/>
+        <toolWindow id="Dubbo Client" anchor="bottom" factoryClass="com.inverse.plugin.DubboConsoleFactory"/>
+
+        <projectConfigurable instance="com.inverse.plugin.SettingsPage"
+                             id="com.inverse.plugin.SettingsPage"
+                             displayName="Dubbo Client Settings"/>
+        <projectService serviceImplementation="com.inverse.plugin.SettingsState"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
-        <action id="AAction" class="com.inverse.plugin.AAction" text="AAction" description="AAction">
-            <add-to-group group-id="ToolsMenu" anchor="first"/>
-        </action>
+<!--        <action id="AAction" class="com.inverse.plugin.AAction" text="AAction" description="AAction">-->
+<!--            <add-to-group group-id="ToolsMenu" anchor="first"/>-->
+<!--        </action>-->
     </actions>
 
 </idea-plugin>
